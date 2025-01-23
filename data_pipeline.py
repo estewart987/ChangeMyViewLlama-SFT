@@ -238,13 +238,10 @@ if __name__ == "__main__":
         json.dump(data, f)
     
     # Split the data into training, validation, and test sets
-    # train_data, val_data, test_data = split_data(data, {"train": 0.85, "test": 0.1})
-    train_data = data[:2]
-    val_data = data[2:4]
-    test_data = data[4:6]
+    train_data, val_data, test_data = split_data(data, {"train": 0.85, "test": 0.1})
 
     # Instantiate the tokenizer
-    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B")
+    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-3B")
     tokenizer.pad_token = tokenizer.eos_token
     padding_value = tokenizer.encode(tokenizer.pad_token)[-1]
 

@@ -14,7 +14,14 @@ from torch.utils.data import Dataset, DataLoader
 from transformers import AutoTokenizer, LlamaForCausalLM, get_scheduler
 from data_pipeline import load_clean_data, CVMDataset, collate_func
 
-def create_dataloaders(dataset, tokenizer, batch_size, num_workers, shuffle=False, drop_last=False):
+def create_dataloaders(
+        dataset: Dataset,
+        tokenizer: transformers.PreTrainedTokenizer,
+        batch_size: int,
+        num_workers: int,
+        shuffle: bool = False,
+        drop_last: bool = False
+    ) -> torch.utils.data.DataLoader:
     """
     Create DataLoader objects.
 
@@ -272,8 +279,8 @@ if __name__ == "__main__":
     val_loader = create_dataloaders(val_dataset, tokenizer, batch_size, num_workers, shuffle=False, drop_last=False)
     test_loader = create_dataloaders(test_dataset, tokenizer, batch_size, num_workers, shuffle=False, drop_last=False)
 
-    # Load the model - CHANGE TO 3B BEFORE COMMITTING
-    model = LlamaForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B")
+    # Load the model
+    model = LlamaForCausalLM.from_pretrained("meta-llama/Llama-3.2-3B")
 
     # Set device and move model to device
     device = torch.device("mps")
@@ -305,7 +312,7 @@ if __name__ == "__main__":
     print("Final training loss:", train_losses[-1])
     print("Final validation loss:", val_losses[-1])
     prompt = fine_tune_data[0]['input']
-    generate_response(model, tokenizer, prompt, device)
+    print(generate_response(model, tokenizer, prompt, device))
 
     # Save the model
     model.save_pretrained(model_save_path)
