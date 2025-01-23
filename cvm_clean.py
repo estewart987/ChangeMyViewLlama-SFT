@@ -88,8 +88,13 @@ def clean_posts(data):
             'author': post['author'],
             'original_post': clean_text(post['title'] + " " + post['selftext'].replace(TEXT_REMOVE, '')),
             'comments': clean_comments(post['comments']),
-            'delta_label': any(comment['author'] == 'DeltaBot' for comment in clean_comments(post['comments']))
+            'delta_label': any('Confirmed: 1 delta awarded' in comment['body'] for comment in clean_comments(post['comments']))
         }
+        # This part will need to be updated - filter out posts after delta awarded, handle multiple deltas, handle back and forths that ultimately led to deltas, etc.
+        if cleaned_post['delta_label']:
+            successful_author = [comment['body'] for comment in cleaned_post['comments'] if 'Confirmed: 1 delta awarded' in comment['body']]
+            match = re.search(r'Confirmed: 1 delta awarded to\s*(?:/u/)?([^\s.^\[]+)', successful_author[0])
+            cleaned_post['successful_author'] = match.group(1)
         data_cleaned.append(cleaned_post)
     return data_cleaned
 
@@ -147,9 +152,9 @@ if __name__ == "__main__":
     # Clean and organize posts
     cleaned_cmv_posts = clean_posts(cmv_posts)
     # Build comment trees for each post and remove flat comments list
-    for post in cleaned_cmv_posts:
-        post["comment_tree"] = build_comment_tree(post["comments"])
-        post.pop("comments", None)
+    # for post in cleaned_cmv_posts:
+    #     post["comment_tree"] = build_comment_tree(post["comments"])
+    #     post.pop("comments", None)
 
     # Save the cleaned data to a new file
     save_data(cleaned_cmv_posts, 'cmv_posts_cleaned.json')
