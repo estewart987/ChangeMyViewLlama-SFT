@@ -239,6 +239,8 @@ if __name__ == "__main__":
     
     # Split the data into training, validation, and test sets
     train_data, val_data, test_data = split_data(data, {"train": 0.85, "test": 0.1})
+    with open("test_data.json", "w") as f:
+        json.dump(test_data, f)
 
     # Instantiate the tokenizer
     tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-3B")

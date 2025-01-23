@@ -134,9 +134,7 @@ def evaluate_test_set(
 
 
 if __name__ == "__main__":
-    # NEED TO GO BACK AND SAVE TEST DATASET TO RELOAD HERE
-    test_data = load_clean_data("fine_tune_data.json")
-    test_data = test_data[:2]
+    test_data = load_clean_data("test_data.json")
 
     # Load in fine-tuned model
     model_save_path = "./fine_tuned_llama_model"
