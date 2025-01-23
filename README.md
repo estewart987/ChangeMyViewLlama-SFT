@@ -24,7 +24,7 @@ To set up the project, follow these steps:
 
 1. Clone the repository:
    ```bash
-   git clone [<repository-url>](https://github.com/estewart987/CVM_LLM_finetune.git)
+   git clone https://github.com/estewart987/CVM_LLM_finetune.git
    cd CVM_LLM_finetune
    ```
 
