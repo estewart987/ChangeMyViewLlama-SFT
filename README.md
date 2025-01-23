@@ -1,7 +1,7 @@
 # Fine-Tuning Llama 3.2 on Change My Views Dataset
 
 ## Overview
-This project fine-tunes the Llama 3.2 model using the Change My Views (CMV) subreddit dataset. The goal is to train the model to generate responses that align with the persuasive and empathetic communication strategies used by posters who successfully changed someone’s opinion. The project serves as a foundation for exploring the potential of large language models (LLMs) to adapt their persuasion techniques depending on the user and issue being discussed.
+This project fine-tunes the Llama 3.2 model using the Change My Views (CMV) subreddit dataset. The goal is to train the model to generate responses that align with the persuasive and empathetic communication strategies used by posters who successfully changed someone’s opinion. The project serves as a foundation for exploring the potential of large language models (LLMs) to adopt effective persuasive communication styles depending on the user and issue being discussed.
 
 ## Features
 The repository contains four Python scripts, each serving a specific purpose:
@@ -68,24 +68,6 @@ Run the scripts in the following order to execute the project:
    export OPENAI_API_KEY=<your-api-key>
    ```
 
-## Folder Structure
-The repository follows a simple structure:
-```
-<repository-root>/
-│
-├── cvm_clean.py        # Cleans the raw CMV dataset
-├── data_pipeline.py    # Formats data for fine-tuning
-├── fine_tune_model.py  # Fine-tunes the Llama model
-├── evaluate_model.py   # Evaluates the fine-tuned model
-├── requirements.txt    # Lists all necessary dependencies
-└── setup.py            # Facilitates installation of the project
-```
-
-## Configuration
-Ensure that the following configurations are in place:
-- OpenAI API key: Set as an environment variable as shown above.
-- Paths to the raw dataset and any other relevant files should be updated in the scripts if necessary.
-
 ## License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
@@ -99,6 +81,3 @@ The project utilizes the Change My Views dataset:
       booktitle = {Proceedings of WWW}
 }
 ```
-
-## Notes
-This project demonstrates the potential for training LLMs to adopt effective persuasive communication styles. It serves as a foundational framework for future research and development in the intersection of LLMs and human-centric communication strategies.
