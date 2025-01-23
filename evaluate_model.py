@@ -1,15 +1,11 @@
 import torch
 import os
 import transformers
-import matplotlib.pyplot as plt
-import torch.nn as nn
 from tqdm import tqdm
 from openai import OpenAI
-from torch.utils.data import DataLoader
 from transformers import AutoTokenizer, LlamaForCausalLM
 
-from data_pipeline import CVMDataset, collate_func
-from fine_tune_model import generate_response, create_dataloaders, load_clean_data
+from fine_tune_model import generate_response, load_clean_data
 
 
 def load_model_and_tokenizer(model_save_path: str) -> tuple[LlamaForCausalLM, AutoTokenizer]:

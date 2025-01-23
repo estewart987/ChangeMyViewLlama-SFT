@@ -3,9 +3,7 @@ import ijson
 import json
 import transformers
 import numpy as np
-import torch.nn as nn
-from functools import partial
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 from transformers import AutoTokenizer
 
 
