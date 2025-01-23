@@ -24,18 +24,13 @@ To set up the project, follow these steps:
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
-   cd <repository-folder>
+   git clone [<repository-url>](https://github.com/estewart987/CVM_LLM_finetune.git)
+   cd CVM_LLM_finetune
    ```
 
 2. Install the required dependencies using `requirements.txt`:
    ```bash
    pip install -r requirements.txt
-   ```
-
-3. Set up the project using the provided `setup.py`:
-   ```bash
-   python setup.py install
    ```
 
 ## Usage
