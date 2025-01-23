@@ -6,22 +6,39 @@ import ijson
 import transformers
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 import torch.nn as nn
+from functools import partial
+from matplotlib.ticker import MaxNLocator
+from torch.utils.data import Dataset, DataLoader
 from transformers import AutoTokenizer, LlamaForCausalLM, get_scheduler
-from data_pipeline import load_clean_data, CVMDataset, collate_func, create_dataloaders
+from data_pipeline import load_clean_data, CVMDataset, collate_func
 
-
-def load_data_loaders(file_path: str) -> torch.utils.data.DataLoader:
+def create_dataloaders(dataset, tokenizer, batch_size, num_workers, shuffle=False, drop_last=False):
     """
-    Load a PyTorch DataLoader from a file.
+    Create DataLoader objects.
 
     Args:
-        file_path (str): The path to the file.
+        dataset (Dataset): A dataset object.
+        tokenizer (PreTrainedTokenizer): A tokenizer instance from the transformers library.
+        batch_size (int): The batch size for the DataLoader.
+        num_workers (int): The number of workers to use for loading data.
+        shuffle (bool): Whether to shuffle the data.
+        drop_last (bool): Whether to drop the last incomplete batch.
 
     Returns:
-        torch.utils.data.DataLoader: The DataLoader object.
+        DataLoader: A DataLoader object for the data.
     """
-    data_loader = torch.load(file_path)
+    collate_with_tokenizer = partial(collate_func, tokenizer=tokenizer)
+
+    data_loader = DataLoader(
+        dataset,
+        batch_size=batch_size,
+        collate_fn=collate_with_tokenizer,
+        num_workers=num_workers,
+        shuffle=shuffle,
+        drop_last=drop_last
+    )
     return data_loader
 
 def batch_loss_calc(
@@ -127,7 +144,6 @@ def generate_response(
     
     # Decode the generated response
     response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    print("Model Response")
     return response
 
 def loss_eval(
@@ -188,7 +204,6 @@ def train_model(
     for epoch in range(num_epochs):
         model.train()
         for batch_idx, batch in enumerate(train_loader):
-            print("test")
             input_batch, target_batch = batch['input_ids'], batch['labels']
             optimizer.zero_grad()
             loss = batch_loss_calc(input_batch, target_batch, model, device)
@@ -214,16 +229,51 @@ def train_model(
 
     return train_losses, val_losses, track_tokens_seen
 
+def plot_losses(epochs: torch.Tensor, tokens_seen: list, train_losses: list, val_losses: list):
+    """
+    Plot the training and validation losses.
+
+    Args:
+        epochs (torch.Tensor): The number of epochs.
+        tokens_seen (list): The number of tokens seen.
+        train_losses (list): The training losses.
+        val_losses (list): The validation losses.
+    """
+
+    fig, ax1 = plt.subplots()
+    ax1.plot(epochs, train_losses, label = "Training loss")
+    ax1.plot(epochs, val_losses, label = "Validation loss")
+    ax1.set_xlabel("Epochs")
+    ax1.set_ylabel("Loss")
+    ax1.legend(loc="upper right")
+    ax1.xaxis.set_major_locator(MaxNLocator(integer=True))
+    ax2 = ax1.twiny()
+    ax2.plot(tokens_seen, train_losses, alpha=0)
+    ax2.set_xlabel("Tokens seen")
+    fig.tight_layout()
+    plt.show()
+
 if __name__ == "__main__":
-    # Load data loaders and cleaned data
-    train_loader = load_data_loaders("train_loader.pth")
-    val_loader = load_data_loaders("val_loader.pth")
-    test_loader = load_data_loaders("test_loader.pth")
+    # Load the datasets
+    train_dataset = torch.load("train_dataset.pth")
+    val_dataset = torch.load("val_dataset.pth")
+    test_dataset = torch.load("test_dataset.pth")
+    
     fine_tune_data = load_clean_data("fine_tune_data.json")
 
+    model_save_path = "./fine_tuned_llama_model"
+    tokenizer = AutoTokenizer.from_pretrained(model_save_path)
+
+    # Create DataLoader objects for the training, validation, and test sets
+    num_workers = 0
+    batch_size = 2
+
+    train_loader = create_dataloaders(train_dataset, tokenizer, batch_size, num_workers, shuffle=True, drop_last=True)
+    val_loader = create_dataloaders(val_dataset, tokenizer, batch_size, num_workers, shuffle=False, drop_last=False)
+    test_loader = create_dataloaders(test_dataset, tokenizer, batch_size, num_workers, shuffle=False, drop_last=False)
+
     # Load the model - CHANGE TO 3B BEFORE COMMITTING
-    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-3B")
-    model = LlamaForCausalLM.from_pretrained("meta-llama/Llama-3.2-3B")
+    model = LlamaForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B")
 
     # Set device and move model to device
     device = torch.device("mps")
@@ -248,6 +298,9 @@ if __name__ == "__main__":
         model, train_loader, val_loader, optimizer, scheduler, device, num_epochs, eval_freq=5
     )
 
+    epochs = torch.linspace(0, num_epochs, len(train_losses))
+    plot_losses(epochs, tokens_seen, train_losses, val_losses)
+    
     # Print results after training
     print("Final training loss:", train_losses[-1])
     print("Final validation loss:", val_losses[-1])
@@ -255,6 +308,4 @@ if __name__ == "__main__":
     generate_response(model, tokenizer, prompt, device)
 
     # Save the model
-    model_save_path = "./fine_tuned_llamam_model"
     model.save_pretrained(model_save_path)
-    tokenizer.save_pretrained(model_save_path)

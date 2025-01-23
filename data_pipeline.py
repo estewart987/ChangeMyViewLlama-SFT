@@ -230,35 +230,6 @@ def collate_func(batch: list, tokenizer: transformers.PreTrainedTokenizer) -> di
         'labels': padded_labels
     }
 
-def create_dataloaders(data, tokenizer, batch_size, num_workers, shuffle=False, drop_last=False):
-    """
-    Create DataLoader objects.
-
-    Args:
-        data (list): A list of dictionaries containing post data.
-        tokenizer (PreTrainedTokenizer): A tokenizer instance from the transformers library.
-        batch_size (int): The batch size for the DataLoader.
-        num_workers (int): The number of workers to use for loading data.
-        shuffle (bool): Whether to shuffle the data.
-        drop_last (bool): Whether to drop the last incomplete batch.
-
-    Returns:
-        DataLoader: A DataLoader object for the data.
-    """
-    dataset = CVMDataset(data, tokenizer)
-    collate_with_tokenizer = partial(collate_func, tokenizer=tokenizer)
-
-    data_loader = DataLoader(
-        dataset,
-        batch_size=batch_size,
-        collate_fn=collate_with_tokenizer,
-        num_workers=num_workers,
-        shuffle=shuffle,
-        drop_last=drop_last
-    )
-    return data_loader
-
-
 if __name__ == "__main__":
     # Load and clean the dataset
     data = load_clean_data("cmv_posts_cleaned.json")
@@ -267,21 +238,25 @@ if __name__ == "__main__":
         json.dump(data, f)
     
     # Split the data into training, validation, and test sets
-    train_data, val_data, test_data = split_data(data, {"train": 0.85, "test": 0.1})
+    # train_data, val_data, test_data = split_data(data, {"train": 0.85, "test": 0.1})
+    train_data = data[:2]
+    val_data = data[2:4]
+    test_data = data[4:6]
 
     # Instantiate the tokenizer
-    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-3B")
+    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B")
     tokenizer.pad_token = tokenizer.eos_token
     padding_value = tokenizer.encode(tokenizer.pad_token)[-1]
 
-    # Create DataLoader objects for the training, validation, and test sets
-    num_workers = 2
-    batch_size = 8
+    # Create the datasets
+    train_dataset = CVMDataset(train_data, tokenizer)
+    val_dataset = CVMDataset(val_data, tokenizer)
+    test_dataset = CVMDataset(test_data, tokenizer)
 
-    train_loader = create_dataloaders(train_data, tokenizer, batch_size, num_workers, shuffle=True, drop_last=True)
-    val_loader = create_dataloaders(val_data, tokenizer, batch_size, num_workers)
-    test_loader = create_dataloaders(test_data, tokenizer, batch_size, num_workers)
+    # Save the datasets and tokenizer
+    torch.save(train_dataset, "train_dataset.pth")
+    torch.save(val_dataset, "val_dataset.pth")
+    torch.save(test_dataset, "test_dataset.pth")
 
-    torch.save(train_loader, "train_loader.pth")
-    torch.save(val_loader, "val_loader.pth")
-    torch.save(test_loader, "test_loader.pth")
+    model_save_path = "./fine_tuned_llama_model"
+    tokenizer.save_pretrained(model_save_path)
