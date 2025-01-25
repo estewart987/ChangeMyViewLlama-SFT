@@ -24,8 +24,8 @@ To set up the project, follow these steps:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/estewart987/CVM_LLM_finetune.git
-   cd CVM_LLM_finetune
+   git clone https://github.com/estewart987/CVM-LLM-finetune.git
+   cd CVM-LLM-finetune
    ```
 
 2. Install the required dependencies using `requirements.txt`:
