@@ -53,8 +53,7 @@ def gpt4o_eval(
         Generated Response: "{generated_response}"
         Target Response: "{target_response}"
 
-        Score the model's response on a scale from 0 to 10, where 0 is completely off-topic and 10 is perfectly on-topic.
-        Consider the relevance, coherence, and informativeness of the response. Respond with the integer number only.
+        Score the model's response using a Likert scale from 1 to 7, where 1 is the worst and 7 is the best. Consider the relevance and fluency of the response when assigning a score.
         """
     api_key = os.getenv("OPENAI_API_KEY")
     client = OpenAI(api_key = api_key)
